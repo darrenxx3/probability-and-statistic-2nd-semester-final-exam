@@ -1,0 +1,512 @@
+dwtest(model)
+#-------UJI HIPOTESA 1---------#
+#H0 = harga hp Android tidak ada hubungannya   dengan Usia
+#H1 = Harga  hp Androdi ada hubungannya dengan usia.
+alpha <- 0.1
+mean1 <- mean(Hape$`9. Berapa harga hp Anda (dalam rupiah)? [contoh tulis : 1.000.000]`)
+(tt <- t.test(Hape$`9. Berapa harga hp Anda (dalam rupiah)? [contoh tulis : 1.000.000]`, mu = mean1, conf.level = 1-alpha, alternative = "two.sided"))
+cor(Hape$`9. Berapa harga hp Anda (dalam rupiah)? [contoh tulis : 1.000.000]`, Hape$`10. Berapa harga hp Anda (dalam rupiah)? [contoh tulis : 1.000.000]`, method = "pearson")
+model <- lm(Hape$`9. Berapa harga hp Anda (dalam rupiah)? [contoh tulis : 1.000.000]`~ Hape$`10. Berapa harga hp Anda (dalam rupiah)? [contoh tulis : 1.000.000]` , data = Hape)
+summary(model)
+#Uji otokorelasi
+dwtest(model)
+#Uji Homokesditas
+bptest(model)
+setwd("D:/UMN Sistem informasi 2021 - 2022/SEMESTER 2/probability and statistic/lab/w10/Lab10StudentSheet")
+knitr::opts_chunk$set(echo = TRUE)
+options(OutDec = ",")
+fit1 <- lm(food32$AnnualFoodSpending ~  food32$AnnualHouseholdIncome, data = food32)
+#a-----------
+#load library
+#### Panggil semua package yang diperlukan.
+library(readxl) #membaca file Excel
+library(nortest) #uji normalitas
+library(ggplot2) #grafik dgn package ggplot2
+library(dplyr)
+library(kableExtra)
+library(agricolae)
+library(lmtest)
+library(car)
+library(tseries)
+library(corrplot)
+#baca data
+food <- readxl::read_excel("labdata.xlsx", sheet = "ConsumerFood")
+str(food)
+head(food)
+tail(food)
+#b-------------
+#filter data
+food32 <- filter(food, food$Region == 'S', food$Location == 'NonMetro')
+View(food32)
+#summary data
+summary(food32)
+#scatter plot
+par(mfrow =c (1,2))
+judul <- "foodspend ~ annualhousehold Darren"
+judul2 <- "foodspend ~ nonmortage Darren"
+plot(food32$AnnualFoodSpending,food32$AnnualHouseholdIncome,   main = judul)
+plot(food32$AnnualFoodSpending,food32$NonMortgageHouseholdDebt, main = judul2)
+#Pola apakah yang anda lihat dalam scatter plot ini?
+#Jawaban: untuk 2 scatter plot ini akan saya jelaskan 1 1
+#foodspend dengan foodhouseholdincome : arahnya adalah positive dimana posisinya naik dari bawah ke atas garisnya, untuk dibilang linear? ya diawalan bisa tapi pas udah mau ujung ujung garisnya regang begitu. untuk kekuatan relasinya bisa dibilang ada yang kkuat dan tidak.
+#foodspend dengan non mortage : arahnya ini ganda yaitu ada positive dan negative menyebar ke segala penjuru arah. dibilanag linear(?) tidak karena seperti yang saya bilang dia datanya menyebar ada yang diatas dan kebawah. untuk kekuatan relasinya lemah.
+cor(food32$AnnualFoodSpending , food32$AnnualHouseholdIncome, method = "pearson")
+cor(food32$AnnualFoodSpending , food32$NonMortgageHouseholdDebt, method = "pearson")
+#koefisien korelasi = ....
+#nilai korelasi Pearson = ;
+#untuk food32spending dan household ada di angka
+##[1] 0,8099432
+#hubungan linier yang sudah digambarkan ini sangat kuat karena mendekati angka 1
+#untuk food32spending dan nonmortage ada di angka
+##[1] 0,1159537
+#hubungan linier yang sudah digambarkan ini lemah karena banyak yang renggang datanya dan dibawah angka < 1
+#c------------
+#fit model
+#fit2 <- lm(food32$AnnualFoodSpending ~ food32$AnnualHouseholdIncome, data = food32)
+#summary(fit2)
+#fit2 <- lm(food32$AnnualFoodSpending ~ food32$NonMortgageHouseholdDebt, data = food32)
+#summary(fit2)
+fit2 <- lm(AnnualFoodSpending ~ AnnualHouseholdIncome + NonMortgageHouseholdDebt, data = food32)
+summary(fit2)
+#cek asumsi
+par(mfrow = c(2,2))
+plot(fit2)
+par(mfrow = c (1,1))
+#plot 1: Residual vs fitted in ini sifatnya heterogenitas tapi dia agak kebawah walaupun ada lewat garis tapi datanya tidak bagus.
+#plot 2: Normal QQ = masih agak normal walaupun diujungnya bengkok, dan bersifat homoskedastic
+#plot 3: Scale-Location = masih normal/terpenuhi karena garisnya masih berada pada garis lurus          dan bersifat homoskedastic.
+#plot 4: Residual vs leverage = cook distancenya dibawah jadi datanya tidak begitu bagus.
+#uji otokorelasi: ...
+dwtest(fit2)
+#uji homoskedastisitas: ...
+bptest(fit2)
+#uji normalitas: ....
+(test1 <- stats::shapiro.test(fit2$residuals))
+#d------------
+#i. Model signifikan?  Jawab: Ya. dilihat dari karena autokorelasinya lebih besar dari 0  nol yaitu 0.6762 p valuenya  serta p-value itu normal.(telah dibuktikan oleh BP test serta VW test)
+#ii. variabilitas ...
+var(food32$AnnualFoodSpending)
+var(food32$AnnualHouseholdIncome)
+var(food32$NonMortgageHouseholdDebt)
+#iii. penambahan ....
+#e---------------
+#model yang lebih baik adalah:
+#berdasarkan kriteria ....
+fit1 <- lm(food32$AnnualFoodSpending ~  food32$AnnualHouseholdIncome, data = food32)
+summary(fit1)
+par(mfrow = c(2,2))
+plot(fit1)
+par(mfrow = c (1,1))
+#uji otokorelasi: ...
+dwtest(fit1)
+#uji homoskedastisitas: ...
+bptest(fit1)
+#uji normalitas: ....
+(test1 <- stats::shapiro.test(fit1$residuals))
+####
+par(mfrow = c(2,2))
+plot(fit2)
+par(mfrow = c (1,1))
+setwd("D:/UMN Sistem informasi 2021 - 2022/SEMESTER 2/UAS/probstats")
+model <- lm(Hape$`9. Berapa harga hp Anda (dalam rupiah)? [contoh tulis : 1.000.000]`~ Hape$`10. Berapa harga hp Anda (dalam rupiah)? [contoh tulis : 1.000.000]` , data = Hape)
+summary(model)
+par(mfrow = c(2,2))
+plot(model)
+plot(model)
+model <- lm(Hape$`9. Berapa harga hp Anda (dalam rupiah)? [contoh tulis : 1.000.000]`~ Hape$`10. Berapa harga hp Anda (dalam rupiah)? [contoh tulis : 1.000.000]` , data = Hape)
+summary(model)
+par(mfrow = c(2,2))
+plot(model)
+plot(model)
+model <- lm(Hape$`9. Berapa harga hp Anda (dalam rupiah)? [contoh tulis : 1.000.000]`~ Hape$`10. Berapa harga hp Anda (dalam rupiah)? [contoh tulis : 1.000.000]` , data = Hape)
+summary(model)
+par(mfrow = c(2,2))
+plot(model)
+plot(model)
+plot(model)
+#par(mfrow = c (1,1))
+#Uji otokorelasi
+dwtest(model)
+#Uji Homokesditas
+bptest(model)
+shapiro.test(model)
+shapiro.test(model)
+shapiro.test(model)
+#cek asumsi fit model (regresi linear)
+model <- lm(Hape$`9. Berapa harga hp Anda (dalam rupiah)? [contoh tulis : 1.000.000]`~ Hape$`10. Berapa harga hp Anda (dalam rupiah)? [contoh tulis : 1.000.000]` , data = Hape)
+summary(model)
+plot(model)
+shapiro.test(model)
+shapiro.test(fitmodel)
+shapiro.test(model)
+#uji shapiro lm test
+(test1 <- stats::shapiro.test(model$residuals))
+model <- lm(Hape$`9. Berapa harga hp Anda (dalam rupiah)? [contoh tulis : 1.000.000]`~ Hape$`10. Berapa harga hp Anda (dalam rupiah)? [contoh tulis : 1.000.000]` , data = Hape)
+summary(model)
+par(mfrow = c(2,2))
+plot(model)
+plot(model)
+#Uji otokorelasi
+dwtest(model)
+results <- aov(Hape$`9. Berapa harga hp Anda (dalam rupiah)? [contoh tulis : 1.000.000]` ~ Hape$`10. Berapa harga hp Anda (dalam rupiah)? [contoh tulis : 1.000.000]`)
+summary(results)
+results <- aov(Hape$`9. Berapa harga hp Anda (dalam rupiah)? [contoh tulis : 1.000.000]` ~ Hape$`10. Berapa harga hp Anda (dalam rupiah)? [contoh tulis : 1.000.000]`)
+summary(results)
+results <- aov(Hape$`9. Berapa harga hp Anda (dalam rupiah)? [contoh tulis : 1.000.000]`~ Hape$`10. Berapa harga hp Anda (dalam rupiah)? [contoh tulis : 1.000.000]`)
+summary(results)
+summary(results)
+s.Hape <- stack(Hape)
+results <- aov(s.Hape$`9. Berapa harga hp Anda (dalam rupiah)? [contoh tulis : 1.000.000]`~ s.Hape$`10. Berapa harga hp Anda (dalam rupiah)? [contoh tulis : 1.000.000]`)
+results <- aov(s.Hape$`9. Berapa harga hp Anda (dalam rupiah)? [contoh tulis : 1.000.000]`~ s.Hape$`10. Berapa harga hp Anda (dalam rupiah)? [contoh tulis : 1.000.000]`)
+results <- aov(s.Hape$`9. Berapa harga hp Anda (dalam rupiah)? [contoh tulis : 1.000.000]`~ s.Hape$`10. Berapa harga hp Anda (dalam rupiah)? [contoh tulis : 1.000.000]`)
+s.Hape <- stack(Hape)
+results <- aov(s.Hape$`9. Berapa harga hp Anda (dalam rupiah)? [contoh tulis : 1.000.000]`~ s.Hape$`10. Berapa harga hp Anda (dalam rupiah)? [contoh tulis : 1.000.000]`)
+Hape <- na.omit(Hape)
+s.Hape <- stack(Hape)
+results <- aov(s.Hape$`9. Berapa harga hp Anda (dalam rupiah)? [contoh tulis : 1.000.000]`~ s.Hape$`10. Berapa harga hp Anda (dalam rupiah)? [contoh tulis : 1.000.000]`)
+results <- aov(s.Hape$`9. Berapa harga hp Anda (dalam rupiah)? [contoh tulis : 1.000.000]`~ s.Hape$`10. Berapa harga hp Anda (dalam rupiah)? [contoh tulis : 1.000.000]`)
+results <- aov(Hape$`9. Berapa harga hp Anda (dalam rupiah)? [contoh tulis : 1.000.000]`~ s.Hape$`10. Berapa harga hp Anda (dalam rupiah)? [contoh tulis : 1.000.000]`)
+results <- aov(Hape$`9. Berapa harga hp Anda (dalam rupiah)? [contoh tulis : 1.000.000]`~ Hape$`10. Berapa harga hp Anda (dalam rupiah)? [contoh tulis : 1.000.000]`)
+summary(results)
+s.Hape <- stack(Hape)
+results <- aov(Hape$`9. Berapa harga hp Anda (dalam rupiah)? [contoh tulis : 1.000.000]`~ Hape$`10. Berapa harga hp Anda (dalam rupiah)? [contoh tulis : 1.000.000]`)
+summary(results)
+wilcox.test(kenyamhapeandroid, kenyamhapeios, paired = TRUE, conf.level = 0.95)
+wilcox.test(Hape$`9. Berapa harga hp Anda (dalam rupiah)? [contoh tulis : 1.000.000]`, Hape$`10. Berapa harga hp Anda (dalam rupiah)? [contoh tulis : 1.000.000]`, paired = TRUE, conf.level = 0.95)
+wilcox.test(Hape$`9. Berapa harga hp Anda (dalam rupiah)? [contoh tulis : 1.000.000]`, kenyamhapeandroid, paired = TRUE, conf.level = 0.95)
+shapiro.test(Hape$`3.  Apakah Anda nyaman menggunakan hp Android?`)
+shapiro.test(Hape$`3.  Apakah Anda nyaman menggunakan hp Android?`, Hape$`4.  Apakah Anda nyaman menggunakan hp IOS?`)
+shapiro.test(Hape$`3.  Apakah Anda nyaman menggunakan hp Android?`, Hape$`4.  Apakah Anda nyaman menggunakan hp IOS?`)
+wilcox.test(Hape$`3.  Apakah Anda nyaman menggunakan hp Android?`, Hape$`4.  Apakah Anda nyaman menggunakan hp IOS?`, paired = TRUE, conf.level = 0.95)
+#uji wilcox2
+wilcox.test(Hape$`3.  Apakah Anda nyaman menggunakan hp Android?`, Hape$`4.  Apakah Anda nyaman menggunakan hp IOS?`, paired = TRUE, conf.level = 0.95)
+results <- aov(Hape$`9. Berapa harga hp Anda (dalam rupiah)? [contoh tulis : 1.000.000]`~ Hape$`10. Berapa harga hp Anda (dalam rupiah)? [contoh tulis : 1.000.000]`)
+summary(results)
+boxplot(Hape$`10. Berapa harga hp Anda (dalam rupiah)? [contoh tulis : 1.000.000]` ~ Hape$Umur, main = "Boxplot perbandingan umur dengan harga hp IOS", ylab = "Harga dalam Rupiah(Rp)")
+boxplot(Hape$`10. Berapa harga hp Anda (dalam rupiah)? [contoh tulis : 1.000.000]` ~ Hape$`10. Berapa harga hp Anda (dalam rupiah)? [contoh tulis : 1.000.000]`, ylab = "Harga dalam Rupiah(Rp)")
+boxplot(Hape$`10. Berapa harga hp Anda (dalam rupiah)? [contoh tulis : 1.000.000]` ~ Hape$`9. Berapa harga hp Anda (dalam rupiah)? [contoh tulis : 1.000.000]`, ylab = "Harga dalam Rupiah(Rp)")
+knitr::opts_chunk$set(echo = TRUE)
+cor(Hape$`9. Berapa harga hp Anda (dalam rupiah)? [contoh tulis : 1.000.000]`, Hape$`10. Berapa harga hp Anda (dalam rupiah)? [contoh tulis : 1.000.000]`, method = "pearson")
+cor.test(Hape$`9. Berapa harga hp Anda (dalam rupiah)? [contoh tulis : 1.000.000]`, Hape$`10. Berapa harga hp Anda (dalam rupiah)? [contoh tulis : 1.000.000]`, method = "pearson")
+cor.test(Hape$`9. Berapa harga hp Anda (dalam rupiah)? [contoh tulis : 1.000.000]`, Hape$`10. Berapa harga hp Anda (dalam rupiah)? [contoh tulis : 1.000.000]`, method = "spearman")
+cor.test(Hape$`9. Berapa harga hp Anda (dalam rupiah)? [contoh tulis : 1.000.000]`, Hape$`10. Berapa harga hp Anda (dalam rupiah)? [contoh tulis : 1.000.000]`, method = "pearson")
+shapiro.test(Hape$`9. Berapa harga hp Anda (dalam rupiah)? [contoh tulis : 1.000.000]` , Hape$Umur)
+shapiro.test(Hape$`9. Berapa harga hp Anda (dalam rupiah)? [contoh tulis : 1.000.000]` ~ Hape$Umur)
+shapiro.test(Hape$`9. Berapa harga hp Anda (dalam rupiah)? [contoh tulis : 1.000.000]` , Hape$Umur)
+shapiro.test(Hape$`9. Berapa harga hp Anda (dalam rupiah)? [contoh tulis : 1.000.000]`, Hape$`3.  Apakah Anda nyaman menggunakan hp Android?`)
+#load library
+#### Panggil semua package yang diperlukan.
+library(readxl) #membaca file Excel
+library(nortest) #uji normalitas
+library(ggplot2) #grafik dgn package ggplot2
+library(dplyr)
+library(kableExtra)
+library(agricolae)
+library(lmtest)
+library(car)
+library(tseries)
+library(corrplot)
+library(moments)
+library(ggpubr)
+library(raster)
+#BACA DATA DARI EXCEL
+Hape <- readxl::read_excel("Probstats (Responses).xlsx", sheet = "Form Responses 1")
+Hape
+str(Hape)
+head(Hape)
+tail(Hape)
+#-------------------------UJINORMALITAS---------------------------------#
+test1 <- stats::shapiro.test(Hape$`9. Berapa harga hp Anda (dalam rupiah)? [contoh tulis : 1.000.000]`)
+test1
+#korelasi pearson
+cor.test(Hape$`9. Berapa harga hp Anda (dalam rupiah)? [contoh tulis : 1.000.000]`, Hape$`10. Berapa harga hp Anda (dalam rupiah)? [contoh tulis : 1.000.000]`, method = "spearman")
+boxplot(Hape$`10. Berapa harga hp Anda (dalam rupiah)? [contoh tulis : 1.000.000]` ~ Hape$`9. Berapa harga hp Anda (dalam rupiah)? [contoh tulis : 1.000.000]`, ylab = "Harga dalam Rupiah(Rp)")
+boxplot(Hape$`10. Berapa harga hp Anda (dalam rupiah)? [contoh tulis : 1.000.000]` ~ Hape$Umur, main = "Boxplot perbandingan umur dengan harga hp IOS", ylab = "Harga dalam Rupiah(Rp)")
+boxplot(Hape$`10. Berapa harga hp Anda (dalam rupiah)? [contoh tulis : 1.000.000]` ~ Hape$`9. Berapa harga hp Anda (dalam rupiah)? [contoh tulis : 1.000.000]`, ylab = "Harga dalam Rupiah(Rp)")
+barplot(versusOS, main = "Distribusi pengguna operating system antara Android dan IOS", xlab = sbx, col = c(18,19))
+boxplot(Hape$`10. Berapa harga hp Anda (dalam rupiah)? [contoh tulis : 1.000.000]` ~ Hape$`9. Berapa harga hp Anda (dalam rupiah)? [contoh tulis : 1.000.000]`, ylab = "Harga dalam Rupiah(Rp)")
+warna <- c("Red","Blue")
+barplot(Hape$`9. Berapa harga hp Anda (dalam rupiah)? [contoh tulis : 1.000.000]`, Hape$`10. Berapa harga hp Anda (dalam rupiah)? [contoh tulis : 1.000.000]`, beside = TRUE , col = warna , legend.text = c("IOS","ANDROID"), main = "Perbandingan harga pengguna IOS vs Android 2 sided")
+boxplot(Hape$`9. Berapa harga hp Anda (dalam rupiah)? [contoh tulis : 1.000.000]` ~ Hape$Umur, main = "Boxplot perbandingan umur dengan harga hp Android", ylab= "Harga dalam Rupiah(Rp)")
+#korelasi pearson
+cor.test(Hape$`9. Berapa harga hp Anda (dalam rupiah)? [contoh tulis : 1.000.000]`, Hape$`10. Berapa harga hp Anda (dalam rupiah)? [contoh tulis : 1.000.000]`, method = "spearman")
+knitr::opts_chunk$set(echo = TRUE)
+#load library
+#### Panggil semua package yang diperlukan.
+library(readxl) #membaca file Excel
+library(nortest) #uji normalitas
+library(ggplot2) #grafik dgn package ggplot2
+library(dplyr)
+library(kableExtra)
+library(agricolae)
+library(lmtest)
+library(car)
+library(tseries)
+library(corrplot)
+library(moments)
+library(ggpubr)
+library(raster)
+#BACA DATA DARI EXCEL
+Hape <- readxl::read_excel("Probstats (Responses).xlsx", sheet = "Form Responses 1")
+Hape
+str(Hape)
+head(Hape)
+tail(Hape)
+##--TABLE dan pewarnaan untuk DATA KATEGORIKAL--##
+kenyamhapeandroid <- table(Hape$`3.  Apakah Anda nyaman menggunakan hp Android?`)
+kenyamhapeandroid
+kenyamhapeios <-table(Hape$`4.  Apakah Anda nyaman menggunakan hp IOS?`)
+kenyamhapeios
+pilihfiturmana <- table(Hape$`2. Fitur, aplikasi, dan tampilan lebih suka yang mana ? (security, apps ekslusif,  icon, system update, kustomisasi OS, UI , UX dan multitasking)`)
+pilihfiturmana
+versusOS <- table(Hape$`1. Anda menggunakan hp ?`)
+versusOS
+baterai <- table(Hape$`6. Daya tahan baterai lebih awet di hp?`)
+baterai
+hargaandroiddanumur <- table(Hape$`9. Berapa harga hp Anda (dalam rupiah)? [contoh tulis : 1.000.000]`, Hape$Umur)
+hargaandroiddanumur
+hargaiosdanumur <- table(Hape$`10. Berapa harga hp Anda (dalam rupiah)? [contoh tulis : 1.000.000]`, Hape$Umur)
+hargaiosdanumur
+campuran <- table(Hape$`9. Berapa harga hp Anda (dalam rupiah)? [contoh tulis : 1.000.000]`, Hape$`10. Berapa harga hp Anda (dalam rupiah)? [contoh tulis : 1.000.000]`)
+campuran
+plot(Hape$`3.  Apakah Anda nyaman menggunakan hp Android?`)
+sbx <- "Tingkat kenyamanan"
+sby <- "Populasi"
+barplot(kenyamhapeandroid, main = "Distribusi Kenyamanan Pengguna Android", xlab = sbx ,ylab = sby ,col = c(6,7,8,9,10), legend.text = c( "2 = Tidak nyaman", "3 = Cukup", "4 = Nyaman", "5 = Sangat Nyaman"))
+#Jadi untuk frekuensi tertinggi dalam barplot ini adalah 5, yaitu untuk si pengguna yang kenyamanannya"Sangat Nyaman", diikuti oleh frekuensi tengah tertinggi yaitu 4 untuk si pengguna kenyamanan "Nyaman" dan yang terakhir untuk si frekuensi rendah yaitu  2 untuk si pengguna kenyamanan "Tidak Nyaman". Note: dalam data ini frekuensi 1 untuk si pengguna "Sangat Tidak Nyaman"... responden tidak ada yang mengisi di bagian ini maka dari itu,  di system R tidak mendetek adanya data untuk frekuensi 1.
+#Kesimpulan dari data di atas bahwa tingkat/rating kenyamanan dalam penggunaan Android oleh responden saya paling besar di tingkat/rating 5 yakni "Sangat Nyaman", diikuti oleh tingkat/rating 4 yakni "Nyaman"  dan paling kecil di tingkat/rating 2 yaitu "tidak nyaman".
+plot(Hape$`4.  Apakah Anda nyaman menggunakan hp IOS?`)
+barplot(kenyamhapeios, main = "Distribusi Kenyamanan Pengguna IOS", xlab = sbx ,ylab = sby , col = c(11,12,13,14,15), legend.text = c( "1 = Sangat tidak nyaman", "2 = Tidak nyaman", "3 = Cukup", "4 = Nyaman", "5 = Sangat Nyaman"))
+#Jadi untuk frekuensi tertinggi dalam barplot ini adalah 5, yaitu untuk si pengguna yang kenyamanannya"Sangat Nyaman", diikuti oleh frekuensi tengah tertinggi yaitu 3 untuk si pengguna kenyamanan "Cukup" dan yang terakhir untuk si frekuensi rendah yaitu  1 untuk si pengguna kenyamanan "Sangat tidak Nyaman".
+#Kesimpulan dari data di atas bahwa tingkat/rating kenyamanan dalam penggunaan IOS oleh responden saya paling besar di tingkat/rating 5 yakni "Sangat Nyaman", diikuti oleh tingkat/rating 3 yakni "Cukup"  dan paling kecil di tingkat/rating 1 yaitu "Sangat tidak nyaman".
+sbx <- "Operating System"
+sby <- "Frekuensi"
+barplot(pilihfiturmana, main = "Distribusi pengguna lebih suka fitur di OS apa?(security,apps,system update, dll)", xlab = sbx, ylab = sby, col = c(16,17))
+#frekuensi tertinggi dalam barplot diatas dimenangkan oleh data "Android", sedangkan frekuensi terendah dipegang oleh "IOS".
+#Kesimpulan terhadap data diatas adalah jumlah responden terhadap kesukaan fitur OS Android bisa dikatakan banyak sedangkan untuk  jumlah responden yang menjawab IOS bisa dibilang sedikit.
+barplot(versusOS, main = "Distribusi pengguna operating system antara Android dan IOS", xlab = sbx, col = c(18,19))
+#frekuensi tertinggi dalam barplot diatas dimenangkan oleh pengguna "Android", sedangkan frekuensi terendah dipegang oleh pengguna "IOS".
+#Kesimpulannya adalah masih banyak sekali para pengguna hp Android(responden saya) ketimbang penggunaan hp IOS yang cenderung sedikit.
+barplot(baterai, main = "Distribusi lebih awetan baterai Android vs IOS?", col = c(20,21, 22, 24, 25,26,27,28), legend.text = c("Android", "IOS", "lain-lain"))
+#frekuensi tertinggi dalam barplot diatas adalah pengguna"Android", sedangkan frekuensi terendahnya dipegang oleh pengguna "IOS" dan frekuensi lain-lain  selebihnya menjawab "tergantung merek/tipe hp".
+#Kesimpulannya adalah untuk keawetan baterai,  meskipun ada jawaban "lain-lain" dari responden tetap saja responden lebih menjawab Android ketimbang IOS. Yang bisa saya simpulkan sementara bahwa Hp Android lebih irit baterainya daripada IOS, tetapi jawaban ini belum tentu benar karena bisa saja berbeda beda tidak ideal pemakaian antara 1 pengguna dengan pengguna laennya.
+#Uji Wilcox
+wilcox.test(Hape$`9. Berapa harga hp Anda (dalam rupiah)? [contoh tulis : 1.000.000]`, Hape$`10. Berapa harga hp Anda (dalam rupiah)? [contoh tulis : 1.000.000]`, paired = TRUE, conf.level = 0.95)
+wilcox.test(Hape$`3.  Apakah Anda nyaman menggunakan hp Android?`, Hape$`4.  Apakah Anda nyaman menggunakan hp IOS?`, paired = TRUE, conf.level = 0.95)
+#Uji Wilcox
+wilcox.test(Hape$`9. Berapa harga hp Anda (dalam rupiah)? [contoh tulis : 1.000.000]`, Hape$`10. Berapa harga hp Anda (dalam rupiah)? [contoh tulis : 1.000.000]`, paired = TRUE, conf.level = 0.95)
+(test1 <- stats::shapiro.test(model$residuals))
+#Uji Wilcox
+wilcox.test(Hape$`9. Berapa harga hp Anda (dalam rupiah)? [contoh tulis : 1.000.000]`, Hape$`10. Berapa harga hp Anda (dalam rupiah)? [contoh tulis : 1.000.000]`, paired = TRUE, conf.level = 0.95)
+#uji wilcox2
+wilcox.test(Hape$`3.  Apakah Anda nyaman menggunakan hp Android?`, Hape$`4.  Apakah Anda nyaman menggunakan hp IOS?`, paired = TRUE, conf.level = 0.95)
+results <- aov(Hape$`9. Berapa harga hp Anda (dalam rupiah)? [contoh tulis : 1.000.000]`~ Hape$`10. Berapa harga hp Anda (dalam rupiah)? [contoh tulis : 1.000.000]`)
+summary(results)
+model <- lm(Hape$`9. Berapa harga hp Anda (dalam rupiah)? [contoh tulis : 1.000.000]`~ Hape$`10. Berapa harga hp Anda (dalam rupiah)? [contoh tulis : 1.000.000]` , data = Hape)
+summary(model)
+#Uji Wilcox
+wilcox.test(Hape$`9. Berapa harga hp Anda (dalam rupiah)? [contoh tulis : 1.000.000]`, Hape$`10. Berapa harga hp Anda (dalam rupiah)? [contoh tulis : 1.000.000]`, paired = TRUE, conf.level = 0.95)
+#uji wilcox2
+wilcox.test(Hape$`3.  Apakah Anda nyaman menggunakan hp Android?`, Hape$`4.  Apakah Anda nyaman menggunakan hp IOS?`, paired = TRUE, conf.level = 0.95)
+#Uji Wilcox
+wilcox.test(Hape$`9. Berapa harga hp Anda (dalam rupiah)? [contoh tulis : 1.000.000]`, Hape$`10. Berapa harga hp Anda (dalam rupiah)? [contoh tulis : 1.000.000]`, paired = TRUE, conf.level = 0.95)
+#korelasi pearson
+cor.test(Hape$`9. Berapa harga hp Anda (dalam rupiah)? [contoh tulis : 1.000.000]`, Hape$`10. Berapa harga hp Anda (dalam rupiah)? [contoh tulis : 1.000.000]`, method = "spearman")
+wilcox.test(Hape$`3.  Apakah Anda nyaman menggunakan hp Android?`, Hape$`4.  Apakah Anda nyaman menggunakan hp IOS?`, paired = TRUE, conf.level = 0.95)
+wilcox.test(Hape$`9. Berapa harga hp Anda (dalam rupiah)? [contoh tulis : 1.000.000]`, Hape$`10. Berapa harga hp Anda (dalam rupiah)? [contoh tulis : 1.000.000]`, paired = TRUE, conf.level = 0.95)
+#Uji Wilcox
+wilcox.test(Hape$`9. Berapa harga hp Anda (dalam rupiah)? [contoh tulis : 1.000.000]`, Hape$`10. Berapa harga hp Anda (dalam rupiah)? [contoh tulis : 1.000.000]`, paired = TRUE, conf.level = 0.95)
+#uji wilcox2
+wilcox.test(Hape$`3.  Apakah Anda nyaman menggunakan hp Android?`, Hape$`4.  Apakah Anda nyaman menggunakan hp IOS?`, paired = TRUE, conf.level = 0.95)
+#Uji otokorelasi
+dwtest(model)
+wilcox.test(Hape$`3.  Apakah Anda nyaman menggunakan hp Android?`, Hape$`4.  Apakah Anda nyaman menggunakan hp IOS?`, paired = TRUE, conf.level = 0.95)
+wilcox.test(Hape$`9. Berapa harga hp Anda (dalam rupiah)? [contoh tulis : 1.000.000]`, Hape$`10. Berapa harga hp Anda (dalam rupiah)? [contoh tulis : 1.000.000]`, paired = TRUE, conf.level = 0.95)
+(test1 <- stats::shapiro.test(model$residuals))
+#load library
+#### Panggil semua package yang diperlukan.
+library(readxl) #membaca file Excel
+library(nortest) #uji normalitas
+library(ggplot2) #grafik dgn package ggplot2
+library(dplyr)
+library(kableExtra)
+library(agricolae)
+library(lmtest)
+library(car)
+library(tseries)
+library(corrplot)
+library(moments)
+library(ggpubr)
+library(raster)
+#BACA DATA DARI EXCEL
+Hape <- readxl::read_excel("Probstats (Responses).xlsx", sheet = "Form Responses 1")
+Hape
+str(Hape)
+head(Hape)
+tail(Hape)
+#Uji Wilcox
+wilcox.test(Hape$`9. Berapa harga hp Anda (dalam rupiah)? [contoh tulis : 1.000.000]`, Hape$`10. Berapa harga hp Anda (dalam rupiah)? [contoh tulis : 1.000.000]`, paired = TRUE, conf.level = 0.95)
+alpha <- 0.1
+mean1 <- mean(Hape$`9. Berapa harga hp Anda (dalam rupiah)? [contoh tulis : 1.000.000]`)
+(tt <- t.test(Hape$`9. Berapa harga hp Anda (dalam rupiah)? [contoh tulis : 1.000.000]`, mu = mean1, conf.level = 1-alpha, alternative = "two.sided"))
+wilcox.test(Hape$`3.  Apakah Anda nyaman menggunakan hp Android?`
+wilcox.test(Hape$`3.  Apakah Anda nyaman menggunakan hp Android?`, Hape$`4.  Apakah Anda nyaman menggunakan hp IOS?`, paired = TRUE, conf.level = 0.95)
+wilcox.test(Hape$`3.  Apakah Anda nyaman menggunakan hp Android?`, Hape$`4.  Apakah Anda nyaman menggunakan hp IOS?`, paired = TRUE, conf.level = 0.95)
+wilcox.test(Hape$`9. Berapa harga hp Anda (dalam rupiah)? [contoh tulis : 1.000.000]`, Hape$`10. Berapa harga hp Anda (dalam rupiah)? [contoh tulis : 1.000.000]`, paired = TRUE, conf.level = 0.95)
+wilcox.test(Hape$`9. Berapa harga hp Anda (dalam rupiah)? [contoh tulis : 1.000.000]`, Hape$`10. Berapa harga hp Anda (dalam rupiah)? [contoh tulis : 1.000.000]`, paired = TRUE, conf.level = 0.95)
+wilcox.test(Hape$`3.  Apakah Anda nyaman menggunakan hp Android?`, Hape$`4.  Apakah Anda nyaman menggunakan hp IOS?`, paired = TRUE, conf.level = 0.95)
+#korelasi pearson
+cor.test(Hape$`9. Berapa harga hp Anda (dalam rupiah)? [contoh tulis : 1.000.000]`, Hape$`10. Berapa harga hp Anda (dalam rupiah)? [contoh tulis : 1.000.000]`, method = "spearman")
+knitr::opts_chunk$set(echo = TRUE)
+#load library
+#### Panggil semua package yang diperlukan.
+library(readxl) #membaca file Excel
+library(nortest) #uji normalitas
+library(ggplot2) #grafik dgn package ggplot2
+library(dplyr)
+library(kableExtra)
+library(agricolae)
+library(lmtest)
+library(car)
+library(tseries)
+library(corrplot)
+library(moments)
+library(ggpubr)
+library(raster)
+#BACA DATA DARI EXCEL
+Hape <- readxl::read_excel("Probstats (Responses).xlsx", sheet = "Form Responses 1")
+Hape
+str(Hape)
+head(Hape)
+tail(Hape)
+##--TABLE dan pewarnaan untuk DATA KATEGORIKAL--##
+kenyamhapeandroid <- table(Hape$`3.  Apakah Anda nyaman menggunakan hp Android?`)
+kenyamhapeandroid
+kenyamhapeios <-table(Hape$`4.  Apakah Anda nyaman menggunakan hp IOS?`)
+kenyamhapeios
+pilihfiturmana <- table(Hape$`2. Fitur, aplikasi, dan tampilan lebih suka yang mana ? (security, apps ekslusif,  icon, system update, kustomisasi OS, UI , UX dan multitasking)`)
+pilihfiturmana
+versusOS <- table(Hape$`1. Anda menggunakan hp ?`)
+versusOS
+baterai <- table(Hape$`6. Daya tahan baterai lebih awet di hp?`)
+baterai
+hargaandroiddanumur <- table(Hape$`9. Berapa harga hp Anda (dalam rupiah)? [contoh tulis : 1.000.000]`, Hape$Umur)
+hargaandroiddanumur
+hargaiosdanumur <- table(Hape$`10. Berapa harga hp Anda (dalam rupiah)? [contoh tulis : 1.000.000]`, Hape$Umur)
+hargaiosdanumur
+campuran <- table(Hape$`9. Berapa harga hp Anda (dalam rupiah)? [contoh tulis : 1.000.000]`, Hape$`10. Berapa harga hp Anda (dalam rupiah)? [contoh tulis : 1.000.000]`)
+campuran
+plot(Hape$`3.  Apakah Anda nyaman menggunakan hp Android?`)
+sbx <- "Tingkat kenyamanan"
+sby <- "Populasi"
+barplot(kenyamhapeandroid, main = "Distribusi Kenyamanan Pengguna Android", xlab = sbx ,ylab = sby ,col = c(6,7,8,9,10), legend.text = c( "2 = Tidak nyaman", "3 = Cukup", "4 = Nyaman", "5 = Sangat Nyaman"))
+#Jadi untuk frekuensi tertinggi dalam barplot ini adalah 5, yaitu untuk si pengguna yang kenyamanannya"Sangat Nyaman", diikuti oleh frekuensi tengah tertinggi yaitu 4 untuk si pengguna kenyamanan "Nyaman" dan yang terakhir untuk si frekuensi rendah yaitu  2 untuk si pengguna kenyamanan "Tidak Nyaman". Note: dalam data ini frekuensi 1 untuk si pengguna "Sangat Tidak Nyaman"... responden tidak ada yang mengisi di bagian ini maka dari itu,  di system R tidak mendetek adanya data untuk frekuensi 1.
+#Kesimpulan dari data di atas bahwa tingkat/rating kenyamanan dalam penggunaan Android oleh responden saya paling besar di tingkat/rating 5 yakni "Sangat Nyaman", diikuti oleh tingkat/rating 4 yakni "Nyaman"  dan paling kecil di tingkat/rating 2 yaitu "tidak nyaman".
+plot(Hape$`4.  Apakah Anda nyaman menggunakan hp IOS?`)
+barplot(kenyamhapeios, main = "Distribusi Kenyamanan Pengguna IOS", xlab = sbx ,ylab = sby , col = c(11,12,13,14,15), legend.text = c( "1 = Sangat tidak nyaman", "2 = Tidak nyaman", "3 = Cukup", "4 = Nyaman", "5 = Sangat Nyaman"))
+#Jadi untuk frekuensi tertinggi dalam barplot ini adalah 5, yaitu untuk si pengguna yang kenyamanannya"Sangat Nyaman", diikuti oleh frekuensi tengah tertinggi yaitu 3 untuk si pengguna kenyamanan "Cukup" dan yang terakhir untuk si frekuensi rendah yaitu  1 untuk si pengguna kenyamanan "Sangat tidak Nyaman".
+#Kesimpulan dari data di atas bahwa tingkat/rating kenyamanan dalam penggunaan IOS oleh responden saya paling besar di tingkat/rating 5 yakni "Sangat Nyaman", diikuti oleh tingkat/rating 3 yakni "Cukup"  dan paling kecil di tingkat/rating 1 yaitu "Sangat tidak nyaman".
+sbx <- "Operating System"
+sby <- "Frekuensi"
+barplot(pilihfiturmana, main = "Distribusi pengguna lebih suka fitur di OS apa?(security,apps,system update, dll)", xlab = sbx, ylab = sby, col = c(16,17))
+#frekuensi tertinggi dalam barplot diatas dimenangkan oleh data "Android", sedangkan frekuensi terendah dipegang oleh "IOS".
+#Kesimpulan terhadap data diatas adalah jumlah responden terhadap kesukaan fitur OS Android bisa dikatakan banyak sedangkan untuk  jumlah responden yang menjawab IOS bisa dibilang sedikit.
+barplot(versusOS, main = "Distribusi pengguna operating system antara Android dan IOS", xlab = sbx, col = c(18,19))
+#frekuensi tertinggi dalam barplot diatas dimenangkan oleh pengguna "Android", sedangkan frekuensi terendah dipegang oleh pengguna "IOS".
+#Kesimpulannya adalah masih banyak sekali para pengguna hp Android(responden saya) ketimbang penggunaan hp IOS yang cenderung sedikit.
+barplot(baterai, main = "Distribusi lebih awetan baterai Android vs IOS?", col = c(20,21, 22, 24, 25,26,27,28), legend.text = c("Android", "IOS", "lain-lain"))
+#frekuensi tertinggi dalam barplot diatas adalah pengguna"Android", sedangkan frekuensi terendahnya dipegang oleh pengguna "IOS" dan frekuensi lain-lain  selebihnya menjawab "tergantung merek/tipe hp".
+#Kesimpulannya adalah untuk keawetan baterai,  meskipun ada jawaban "lain-lain" dari responden tetap saja responden lebih menjawab Android ketimbang IOS. Yang bisa saya simpulkan sementara bahwa Hp Android lebih irit baterainya daripada IOS, tetapi jawaban ini belum tentu benar karena bisa saja berbeda beda tidak ideal pemakaian antara 1 pengguna dengan pengguna laennya.
+##VISUAL TABLE STATITISKA DESKRIPTIF & Numerik##
+#----Perbandingan harga hp dan ios-----#
+options(scipen = 100)
+#to reset scipen = 0)#
+set.seed(1)
+judul1 <- "Distribusi harga Hp pengguna Android"
+judul2 <- "Distribusi harga Hp pengguna IOS"
+labelx <- "Harga dalam Rupiah(Rp)"
+labely <- "Jumlah Pengguna"
+hist(Hape$`9. Berapa harga hp Anda (dalam rupiah)? [contoh tulis : 1.000.000]`, xlim = c(1000000,12000000), main = judul1, xlab = labelx)
+#Frekuensi tertinggi dalam histogram ini adalah angka 2.000.000 sampai dengan 3.000.000, dan yang paling rendah di kisaran angka 10.000.000 sampai dengan 11.000.000
+#Kesimpulannya adalah  kebanyakan dari pengguna(responden) hp Android, harga hape mereka paling banyak ada di kisaraan 2.000.000 - 3.000.000 sehingga bisa saya bilang di harga segitu paling banyak diincar oleh responden, sedangkan hanya sedikit responden yang memiliki hape di harga 7.000.000-10.000.000.
+hist(Hape$`10. Berapa harga hp Anda (dalam rupiah)? [contoh tulis : 1.000.000]`, xlim = c(3000000,15000000), main = judul2, xlab = labelx)
+#Frekuensi tertinggi dalam histogram ini adalah di angka 8.000.000-8.800.000, dan frekuensi paling rendah di angka 15.000.000+ .
+#Kesimpulannya adalah responden masih banyak menggunakan hp mereka di angka 8.000.000 -an dan keatas,(kemungkinan iphone seri lawas dibawah iphone 10), sedangkan hanya sedikit data untuk angka 15.000.000+(kemungkinan di Iphone 10 sampai Iphone 12.
+#DENSITY PLOT
+plot(density(Hape$`9. Berapa harga hp Anda (dalam rupiah)? [contoh tulis : 1.000.000]`), main = "Density plot harga hp Android")
+qqnorm(Hape$`9. Berapa harga hp Anda (dalam rupiah)? [contoh tulis : 1.000.000]`, main = "Density QQplot harga hp Android")
+qqline(Hape$`9. Berapa harga hp Anda (dalam rupiah)? [contoh tulis : 1.000.000]`,col = "red")
+#Density plot diatas menunjukkan bahwa data di atas distribusinya mengikuti Distribusi Gaussian/Normal.
+#QQplot diatas menunjukkan bahwa data di atas distribusinya mengikuti Distribusi Gaussian/Normal.
+plot(density(Hape$`10. Berapa harga hp Anda (dalam rupiah)? [contoh tulis : 1.000.000]`), main = "Density plot harga hp IOS")
+qqnorm(Hape$`10. Berapa harga hp Anda (dalam rupiah)? [contoh tulis : 1.000.000]`, main = "Density QQplot harga hp IOS")
+qqline(Hape$`10. Berapa harga hp Anda (dalam rupiah)? [contoh tulis : 1.000.000]`, col = "blue")
+#Density plot diatas menunjukkan bahwa data di atas distribusinya mengikuti Distribusi Gaussian/Normal.
+#QQplot diatas menunjukkan bahwa data di atas distribusinya mengikuti Distribusi Gaussian/Normal.
+#boxplot
+boxplot(Hape$`9. Berapa harga hp Anda (dalam rupiah)? [contoh tulis : 1.000.000]` ~ Hape$Umur, main = "Boxplot perbandingan umur dengan harga hp Android", ylab= "Harga dalam Rupiah(Rp)")
+#Kesimpulannya adalah pada data < 18 tahun , terdapat 1 outlier(yaitu untuk harga hp yang keluar dari box/chart bisa diliat di kisaran 7 jt), pada data 18-25 tahun ada 6 outlier(yakni harga hpnya yang off-chart di kisaran 8jt sampai dengan 10jt. Untuk median boxplot terbesarnya ada di umur 25-55 tahun dant yang paling terkecil ada di data < 18 tahun.
+boxplot(Hape$`10. Berapa harga hp Anda (dalam rupiah)? [contoh tulis : 1.000.000]` ~ Hape$Umur, main = "Boxplot perbandingan umur dengan harga hp IOS", ylab = "Harga dalam Rupiah(Rp)")
+#Kesimpulannya adalah pada data 18-25 tahun , terdapat 2 outlier(yaitu untuk harga hp yang diatas 14jt sampai dengan 16 jt).Untuk median boxplotnya mirip mirip besarnya namun kalau dilihat dari datanya  <18 tahun  dan 18-25 .Tapi untuk yang paling besar masih dipegang oleh umur < 18 tahun.
+boxplot(Hape$`10. Berapa harga hp Anda (dalam rupiah)? [contoh tulis : 1.000.000]` ~ Hape$`9. Berapa harga hp Anda (dalam rupiah)? [contoh tulis : 1.000.000]`, ylab = "Harga dalam Rupiah(Rp)")
+warna <- c("Red","Blue")
+barplot(Hape$`9. Berapa harga hp Anda (dalam rupiah)? [contoh tulis : 1.000.000]`, Hape$`10. Berapa harga hp Anda (dalam rupiah)? [contoh tulis : 1.000.000]`, beside = TRUE , col = warna , legend.text = c("IOS","ANDROID"), main = "Perbandingan harga pengguna IOS vs Android 2 sided")
+#-------------------------UJINORMALITAS---------------------------------#
+test1 <- stats::shapiro.test(Hape$`9. Berapa harga hp Anda (dalam rupiah)? [contoh tulis : 1.000.000]`)
+test1
+#Hipotesa null normalitas Ditolak pada alpha 5% karena p-value < 0.05.
+#Kesimpulan datanya masih bisa dibilang Distribusi Gaussian.
+test2 <- stats::shapiro.test(Hape$`10. Berapa harga hp Anda (dalam rupiah)? [contoh tulis : 1.000.000]`)
+test2
+#Hipotesa null normalitas Ditolak pada H0 alpha 5% karena p- value < 0.05.
+#kesimpulannya datanya masih mengikuti Distribusi Gaussian.
+#-------MEAN,MEDIAN,SD skewness dan kurtosis-------------#
+mean(hargaandroiddanumur)
+median(hargaandroiddanumur)
+sd(hargaandroiddanumur)
+#----------IOS----------#
+mean(hargaiosdanumur)
+median(hargaiosdanumur)
+sd(hargaiosdanumur)
+skewness(Hape$`9. Berapa harga hp Anda (dalam rupiah)? [contoh tulis : 1.000.000]`, na.rm = T)
+#Kesimpulannya adalah ada di angka 1.374724 yang berarti positif.
+#skewness 1.374724 arah ekor kurva ada disebelah kanan(positive skew), sehingga distribusi nya berada disebelah kanan.
+skewness(Hape$`10. Berapa harga hp Anda (dalam rupiah)? [contoh tulis : 1.000.000]`, na.rm = T)
+#Kesimpulannya adalah ada di angka 0.6303861 yang berarti positif.
+#skewness 0.6303861 arah ekor kurva ada disebelah kanan(positive skew), sehingga distribusinya berada disebelah kanan.
+kurtosis(Hape$`9. Berapa harga hp Anda (dalam rupiah)? [contoh tulis : 1.000.000]`, na.rm = T)
+#kurtosis Hape$`9 ada di angka 4.578091.
+#Kesimpulannya adalah Hape9 ini tipe datanya lepto kurtosis.(meruncing ke atas)
+kurtosis(Hape$`10. Berapa harga hp Anda (dalam rupiah)? [contoh tulis : 1.000.000]`, na.rm = T)
+#Kurtosis hape9 ada di angka 3.283289.
+#Kesimpulannya adalah Hape10 ini tiped datanya lepto kurtosis (meruncing ke atas)
+results <- aov(Hape$`9. Berapa harga hp Anda (dalam rupiah)? [contoh tulis : 1.000.000]`~ Hape$`10. Berapa harga hp Anda (dalam rupiah)? [contoh tulis : 1.000.000]`)
+summary(results)
+#cek asumsi fit model (regresi linear)
+model <- lm(Hape$`9. Berapa harga hp Anda (dalam rupiah)? [contoh tulis : 1.000.000]`~ Hape$`10. Berapa harga hp Anda (dalam rupiah)? [contoh tulis : 1.000.000]` , data = Hape)
+summary(model)
+par(mfrow = c(2,2))
+plot(model)
+#Uji otokorelasi
+dwtest(model)
+#Uji Homokesditas
+bptest(model)
+#----------NON PARAMETRIK--------------------#
+#Uji Wilcox
+wilcox.test(Hape$`9. Berapa harga hp Anda (dalam rupiah)? [contoh tulis : 1.000.000]`, Hape$`10. Berapa harga hp Anda (dalam rupiah)? [contoh tulis : 1.000.000]`, paired = TRUE, conf.level = 0.95)
+#uji wilcox2
+wilcox.test(Hape$`3.  Apakah Anda nyaman menggunakan hp Android?`, Hape$`4.  Apakah Anda nyaman menggunakan hp IOS?`, paired = TRUE, conf.level = 0.95)
+#korelasi pearson
+cor.test(Hape$`9. Berapa harga hp Anda (dalam rupiah)? [contoh tulis : 1.000.000]`, Hape$`10. Berapa harga hp Anda (dalam rupiah)? [contoh tulis : 1.000.000]`, method = "spearman")
+#-------UJI HIPOTESA 1---------#
+#H0 = harga hp Android tidak ada hubungannya   dengan Usia
+#H1 = Harga  hp Androdi ada hubungannya dengan usia.
+alpha <- 0.1
+mean1 <- mean(Hape$`9. Berapa harga hp Anda (dalam rupiah)? [contoh tulis : 1.000.000]`)
+(tt <- t.test(Hape$`9. Berapa harga hp Anda (dalam rupiah)? [contoh tulis : 1.000.000]`, mu = mean1, conf.level = 1-alpha, alternative = "two.sided"))
+#--------UJI HIPOTESA 2----------#
+#H0 = harga hp IOS tidak ada hubungannya dengan usia
+#H1 = Harga hp IOS ada hubungannya dengan usia.
+alpha <- 0.1
+mean2 <- mean(Hape$`10. Berapa harga hp Anda (dalam rupiah)? [contoh tulis : 1.000.000]`)
+(tt <- t.test(Hape$`10. Berapa harga hp Anda (dalam rupiah)? [contoh tulis : 1.000.000]`, mu = mean2, conf.level = 1-alpha, alternative = "two.sided"))
